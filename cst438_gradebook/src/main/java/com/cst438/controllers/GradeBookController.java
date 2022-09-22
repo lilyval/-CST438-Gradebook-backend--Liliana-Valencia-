@@ -1,17 +1,20 @@
 package com.cst438.controllers;
 
 import java.util.ArrayList;
+import java.sql.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -144,7 +147,7 @@ public class GradeBookController {
 		
 		for (GradebookDTO.Grade g : gradebook.grades) {
 			System.out.printf("%s\n", g.toString());
-			AssignmentGrade ag = assignmentGradeRepository.findById(g.assignmentGradeId).orElse(null);
+			AssignmentGrade ag = assignmentGradeRepository.findById(g.assignmentGradeId);
 			if (ag == null) {
 				throw new ResponseStatusException( HttpStatus.BAD_REQUEST, "Invalid grade primary key. "+g.assignmentGradeId);
 			}
@@ -158,7 +161,7 @@ public class GradeBookController {
 	
 	private Assignment checkAssignment(int assignmentId, String email) {
 		// get assignment 
-		Assignment assignment = assignmentRepository.findById(assignmentId).orElse(null);
+		Assignment assignment = assignmentRepository.findById(assignmentId);
 		if (assignment == null) {
 			throw new ResponseStatusException( HttpStatus.BAD_REQUEST, "Assignment not found. "+assignmentId );
 		}
@@ -169,5 +172,40 @@ public class GradeBookController {
 		
 		return assignment;
 	}
+	
+	
+	
+	@PostMapping("/gradebook/add")
+	@Transactional
+	public void addAssignment(@RequestParam("id") int courseId, @RequestParam("name") String name, @RequestParam("due_Date") Date dueDate) {
+		Assignment assignment = new Assignment();
+		assignment.setName(name);
+		assignment.setDueDate(dueDate);
+		assignment.setNeedsGrading(1);
+		Course course = courseRepository.findByCourseId(courseId);
+		assignment.setCourse(course);
+		course.getAssignments().add(assignment);
+		assignmentRepository.save(assignment);
+		
+	}//end addAssignment 
+	
+	
+	@PutMapping("/gradebook/update/{id}")
+	@Transactional
+	public void updateAssignmentName(@PathVariable("id") int assignmentId, @RequestParam("name") String name) {
+		Assignment assignment = assignmentRepository.findById(assignmentId);
+		assignment.setName(name);
+		assignmentRepository.save(assignment);
+		
+	}//end updateAssignmentName 
+	
+	
+	@DeleteMapping("/gradebook/delete/{id}")
+	@Transactional
+	public void deleteAssignment(@PathVariable("id") int assignmentId) {
+		Assignment assignment = assignmentRepository.findById(assignmentId);
+		assignmentRepository.delete(assignment);
+	}//end deleteAssignmnet 
+
 
 }
