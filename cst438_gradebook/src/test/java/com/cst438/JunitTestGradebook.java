@@ -17,6 +17,9 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.util.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Optional;
 
 import com.cst438.controllers.GradeBookController;
@@ -112,7 +115,7 @@ public class JunitTestGradebook {
 		ag.setStudentEnrollment(enrollment);
 
 		// given -- stubs for database repositories that return test data
-		given(assignmentRepository.findById(1)).willReturn(Optional.of(assignment));
+		given(assignmentRepository.findById(1)).willReturn(assignment);
 		given(assignmentGradeRepository.findByAssignmentIdAndStudentEmail(1, TEST_STUDENT_EMAIL)).willReturn(null);
 		given(assignmentGradeRepository.save(any())).willReturn(ag);
 
@@ -140,7 +143,7 @@ public class JunitTestGradebook {
 		// change grade to score = 80
 		result.grades.get(0).grade = "80";
 
-		given(assignmentGradeRepository.findById(1)).willReturn(Optional.of(ag));
+		given(assignmentGradeRepository.findById(1)).willReturn(ag);
 
 		// send updates to server
 		response = mvc
@@ -197,9 +200,9 @@ public class JunitTestGradebook {
 		ag.setStudentEnrollment(enrollment);
 
 		// given -- stubs for database repositories that return test data
-		given(assignmentRepository.findById(1)).willReturn(Optional.of(assignment));
+		given(assignmentRepository.findById(1)).willReturn(assignment);
 		given(assignmentGradeRepository.findByAssignmentIdAndStudentEmail(1, TEST_STUDENT_EMAIL)).willReturn(ag);
-		given(assignmentGradeRepository.findById(1)).willReturn(Optional.of(ag));
+		given(assignmentGradeRepository.findById(1)).willReturn(ag);
 
 		// end of mock data
 
@@ -242,6 +245,83 @@ public class JunitTestGradebook {
 		updatedag.setScore("88");
 		verify(assignmentGradeRepository, times(1)).save(updatedag);
 	}
+	
+
+	@Test
+	public void addAssignment() throws Exception {
+
+		MockHttpServletResponse response;
+		
+		Course course = new Course();
+		course.setCourse_id(TEST_COURSE_ID);
+		course.setSemester(TEST_SEMESTER);
+		course.setYear(TEST_YEAR);
+		course.setInstructor(TEST_INSTRUCTOR_EMAIL);
+		course.setEnrollments(new java.util.ArrayList<Enrollment>());
+		course.setAssignments(new java.util.ArrayList<Assignment>());
+		
+		Assignment expected = new Assignment();
+		expected.setName("assignment1");
+		
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		Date date = dateFormat.parse("2022-06-19");
+		expected.setDueDate(new java.sql.Date(date.getTime()));
+		expected.setCourse(course);
+		expected.setNeedsGrading(1);
+		
+		given(courseRepository.findByCourseId(TEST_COURSE_ID)).willReturn(course);
+
+		response = mvc
+				.perform(MockMvcRequestBuilders.post("/assignment?id=" + TEST_COURSE_ID + "&name=assignment1&due_date=2021-06-19").accept(MediaType.APPLICATION_JSON)
+				).andReturn().getResponse();
+		
+		assertEquals(200, response.getStatus());
+		verify(assignmentRepository, times(1)).save(expected);	
+		
+	}//end test
+	
+	
+	@Test
+	public void updateAssignmentNamet() throws Exception {
+
+		MockHttpServletResponse response;
+		
+		Assignment assignment = new Assignment();
+		assignment.setName("Assignment1");
+		
+		Assignment expected = new Assignment();
+		expected.setName("Assignment1");
+		
+		given(assignmentRepository.findById(TEST_COURSE_ID)).willReturn(assignment);
+
+		response = mvc
+				.perform(MockMvcRequestBuilders.put("/assignment/" + TEST_COURSE_ID + "?name=Assignment1").accept(MediaType.APPLICATION_JSON)
+				).andReturn().getResponse();
+		
+		assertEquals(200, response.getStatus());
+		verify(assignmentRepository, times(1)).save(expected);	
+		
+	}//end test
+	
+	@Test
+	public void deleteAssignmen() throws Exception {
+
+		MockHttpServletResponse response;
+		
+		Assignment assignment = new Assignment();
+		assignment.setName("Assignment1");
+
+		
+		given(assignmentRepository.findById(TEST_COURSE_ID)).willReturn(assignment);
+
+		response = mvc
+				.perform(MockMvcRequestBuilders.delete("/assignment/" + TEST_COURSE_ID).accept(MediaType.APPLICATION_JSON)
+				).andReturn().getResponse();
+		
+		assertEquals(200, response.getStatus());
+		verify(assignmentRepository, times(1)).delete(assignment);	
+		
+	}//end test
 
 	private static String asJsonString(final Object obj) {
 		try {

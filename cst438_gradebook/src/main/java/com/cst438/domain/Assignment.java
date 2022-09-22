@@ -3,6 +3,7 @@ package com.cst438.domain;
 import java.sql.Date;
 import java.util.List;
 
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -65,5 +66,24 @@ public class Assignment {
 		return "Assignment [id=" + id + ", course_id=" + course.getCourse_id() + ", name=" + name + ", dueDate=" + dueDate
 				+ ", needsGrading=" + needsGrading + "]";
 	}
+//	@Override
+//	public int hashCode() {
+//		return Objects.hash(assignmentGrades, course, dueDate, id, name, needsGrading);
+//	}
+//	@Override
+//	public boolean equals(Object obj) {
+//		if (this == obj)
+//			return true;
+//		if (obj == null)
+//			return false;
+//		if (getClass() != obj.getClass())
+//			return false;
+//		Assignment other = (Assignment) obj;
+//		return Objects.equals(assignmentGrades, other.assignmentGrades) && Objects.equals(course, other.course)
+//				&& Objects.equals(dueDate, other.dueDate) && id == other.id && Objects.equals(name, other.name)
+//				&& needsGrading == other.needsGrading;
+//	}
+//	
+	
 	
 }
