@@ -92,7 +92,7 @@ public class EndToEndAssignment {
 					
 		
 					WebElement we = driver.findElement(By.xpath("(//div[@role='row'])[last()]"));
-					assertNotNull(we, "Added assignment does not show in assignment list.");
+					assertNotNull(we, "Added assignment N/A");
 					
 					Assignment as = assignmentRepository.findByCourseIdAndName(COURSE_ID, TEST_ASSIGNMENT_NAME);
 					assertNotNull(as, "N/A");
